@@ -1,0 +1,93 @@
+# Namespace-independent configuration for the fixed-base L05 stand.
+/**/controller_manager:
+  ros__parameters:
+    use_sim_time: true
+    update_rate: 100
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    humanoid_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+/**/humanoid_controller:
+  ros__parameters:
+    joints:
+      - left_shoulder_pitch
+      - left_shoulder_roll
+      - left_elbow_pitch
+      - left_wrist_roll
+      - right_shoulder_pitch
+      - right_shoulder_roll
+      - right_elbow_pitch
+      - right_wrist_roll
+      - left_hip_yaw
+      - left_hip_roll
+      - left_hip_pitch
+      - left_knee_pitch
+      - left_ankle_pitch
+      - right_hip_yaw
+      - right_hip_roll
+      - right_hip_pitch
+      - right_knee_pitch
+      - right_ankle_pitch
+    command_interfaces: [position]
+    state_interfaces: [position, velocity]
+    allow_partial_joints_goal: false
+    constraints:
+      goal_time: 1.0
+      stopped_velocity_tolerance: 0.1
+      left_shoulder_pitch:
+        trajectory: 0.30
+        goal: 0.12
+      left_shoulder_roll:
+        trajectory: 0.30
+        goal: 0.12
+      left_elbow_pitch:
+        trajectory: 0.30
+        goal: 0.12
+      left_wrist_roll:
+        trajectory: 0.30
+        goal: 0.12
+      right_shoulder_pitch:
+        trajectory: 0.30
+        goal: 0.12
+      right_shoulder_roll:
+        trajectory: 0.30
+        goal: 0.12
+      right_elbow_pitch:
+        trajectory: 0.30
+        goal: 0.12
+      right_wrist_roll:
+        trajectory: 0.30
+        goal: 0.12
+      left_hip_yaw:
+        trajectory: 0.30
+        goal: 0.12
+      left_hip_roll:
+        trajectory: 0.30
+        goal: 0.12
+      left_hip_pitch:
+        trajectory: 0.30
+        goal: 0.12
+      left_knee_pitch:
+        trajectory: 0.30
+        goal: 0.12
+      left_ankle_pitch:
+        trajectory: 0.30
+        goal: 0.12
+      right_hip_yaw:
+        trajectory: 0.30
+        goal: 0.12
+      right_hip_roll:
+        trajectory: 0.30
+        goal: 0.12
+      right_hip_pitch:
+        trajectory: 0.30
+        goal: 0.12
+      right_knee_pitch:
+        trajectory: 0.30
+        goal: 0.12
+      right_ankle_pitch:
+        trajectory: 0.30
+        goal: 0.12
+    action_monitor_rate: 20.0
+    state_publish_rate: 50.0

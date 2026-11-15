@@ -1,0 +1,132 @@
+environment:
+  commit: ''
+  image: ''
+  architecture: x86_64
+  package_versions: ''
+experiments:
+- symptom: Starter не содержит завершённых bridge channels, sensor systems и анализатора измерений.
+  observation: 'После заполнения конфигурации и анализатора тесты прошли; основной check завершён успешно,
+    все 40 checks имеют ok=true. LiDAR: 180 лучей, 90 конечных дальностей, центральная дальность 2.220136
+    m. Camera: RGB8, 160x120, значения пикселей 49–243; CameraInfo согласован. IMU acceleration z: 9.81
+    m/s². Прямое перемещение: 0.403503 m; поворот: 0.683970 rad; дрейф после stop: 3.08103e-6 m.'
+  cause: Прикладным каналам необходимы корректные ROS/Gazebo types и направления bridge; камера и GPU
+    LiDAR требуют Sensors, IMU требует Imu.
+  change: В homework/wiring.yaml заполнены пять каналов с относительными ROS names и фиксированными Gazebo
+    suffixes. В homework/systems.yaml включены Sensors и Imu, заданы scan=10, imu=100, camera=10, odom=50
+    Hz и камера 160x120. Реализован analyze_samples.
+  verification_command: './course build
+
+    ./course test
+
+    ./course check --mode homework'
+  evidence_path: evidence/homework-check.json
+  limitation: Отчёт исходно создан как evidence/latest.json и сохранён под именем homework-check.json.
+    Проверка подтверждает данный сценарий и конфигурацию; оценку выставляет независимая проверка submitted
+    commit. Seed=42, target RTF=1.0, measured RTF=0.991625, profile=ideal, timeout=90 s.
+- symptom: Pause, step и reset должны сохранять объявленную семантику simulated time.
+  observation: 'На pause sim time=11.634 s и iterations=11634 не изменились. После 1000 steps: time=12.634
+    s, iterations=12634; приращение времени 1 s. Reset вернул time и iterations в 0. Зарегистрирован clock
+    jump 12.634→0 s.'
+  cause: Reset переводит симуляцию в новую временную эпоху. TF предыдущей эпохи нельзя использовать после
+    скачка времени назад.
+  change: analyze_samples обнаруживает любое уменьшение stamp в исходном порядке, считает все эпохи, использует
+    только последнюю и сохраняет первую запись каждого stamp. Нулевой stamp разрешён, вход не изменяется.
+    После reset следующий опыт запускается в свежей сцене.
+  verification_command: './course test
+
+    ./course check --mode homework'
+  evidence_path: evidence/homework-check.json
+  limitation: Очистка tf2 buffer при jump back ожидаема. Стационарные metrics в check собраны до reset,
+    поэтому epochs=1 в них не противоречит последующему reset. Крайние случаи анализатора проверяются
+    unit tests; recovery без перезапуска не исследуется.
+- symptom: Нужно сравнить движение в двух независимых свежих запусках одного сценария с seed=42.
+  observation: 'Оба check успешны, в каждом 40/40 checks. Run 1: forward=0.404302746 m, yaw=0.680820252
+    rad, drift=3.41043338e-06 m, measured RTF=0.991804. Run 2: forward=0.402102746 m, yaw=0.683969885
+    rad, drift=3.08103378e-06 m, measured RTF=0.990039. Абсолютные разницы: forward=0.002200 m, yaw=0.003149633
+    rad, drift=3.293996e-7 m.'
+  cause: Одинаковый seed фиксирует случайную составляющую, но не гарантирует одинаковый порядок и моменты
+    доставки команд относительно шагов симуляции. Источник конкретных расхождений отдельно не измерялся.
+  change: 'Выполнены два отдельных check, каждый создавал свежую сцену. Параметры одинаковы: seed=42,
+    target RTF=1.0, profile=ideal, timeout=90 s.'
+  verification_command: './course check --mode homework --seed 42 --output evidence/repeat-1.json
+
+    ./course check --mode homework --seed 42 --output evidence/repeat-2.json'
+  evidence_path: evidence/repeat-1.json; evidence/repeat-2.json
+  limitation: 'Оба результата укладываются в опубликованные индивидуальные критерии: forward 0.28–0.55
+    m, yaw 0.4–0.8 rad, drift <0.02 m. Отдельных численных порогов для разницы двух запусков в предоставленном
+    контракте нет; разницы приведены явно. Побитовая повторяемость не заявляется.'
+- symptom: Частоты по simulated time и monotonic arrival time необходимо различать.
+  observation: 'target=1.0: measured RTF=0.983708, sim span=10.009 s, wall span=10.175 s; IMU N=989, sim_hz=98.800,
+    wall_hz=97.182; scan N=100, sim_hz=10.000, wall_hz=9.841; image N=100, sim_hz=10.000, wall_hz=9.842.
+
+    target=0.5: measured RTF=0.499153, sim span=10.004 s, wall span=20.042 s; IMU N=1001, sim_hz=100.000,
+    wall_hz=49.914; scan N=100, sim_hz=10.000, wall_hz=4.995; image N=100, sim_hz=10.000, wall_hz=4.997.'
+  cause: RTF — отношение приращения simulated time к steady time. При меньшем RTF те же simulated seconds
+    занимают больше реального времени.
+  change: При неизменных sensor rates и physics step=0.001 s выполнены два свежих запуска с target RTF=1.0
+    и 0.5. Observer использовал совпадающие параметры, duration=10 simulated seconds, seed=42, profile=ideal,
+    timeout=90 s.
+  verification_command: 'Терминал A: ./course homework headless target_rtf:=1.0 seed:=42
+
+    Терминал B: ./course observe --profile ideal --seed 42 --target-rtf 1.0 --duration 10 --output evidence/rtf-1.json
+
+    После observe остановить launch через Ctrl+C.
+
+    Терминал A: ./course homework headless target_rtf:=0.5 seed:=42
+
+    Терминал B: ./course observe --profile ideal --seed 42 --target-rtf 0.5 --duration 10 --output evidence/rtf-half.json
+
+    После observe остановить launch через Ctrl+C.'
+  evidence_path: evidence/rtf-1.json; evidence/rtf-half.json
+  limitation: Target RTF не гарантирует фактическую скорость. Метрики характеризуют полученные сообщения;
+    IMU 98.8 Hz в первом опыте находится в допуске ±15%, но причина небольшого снижения отдельно не установлена.
+- symptom: Нужно различить случайный разброс и систематическое смещение гироскопа неподвижного робота.
+  observation: 'ideal: N=1997, gyro_mean=2.5221876e-20 rad/s, population gyro_std=3.1162119226e-17 rad/s,
+    measured RTF=0.988994.
+
+    white: N=2000, gyro_mean=5.07471423649e-05 rad/s, population gyro_std=0.019842116893 rad/s, measured
+    RTF=0.990155.
+
+    biased: N=2001, gyro_mean=0.0800841819721 rad/s, population gyro_std=0.0198232556823 rad/s, measured
+    RTF=0.983733.'
+  cause: 'Параметры Gaussian mean/stddev: ideal=0/0, white=0/0.02, biased=0.08/0.02 rad/s. Biased реализован
+    через постоянное ненулевое Gaussian mean.'
+  change: Для каждого профиля создана отдельная неподвижная сцена без команд движения; seed=42, target
+    RTF=1.0, duration=20 simulated seconds, timeout=90 s.
+  verification_command: 'Терминал A: ./course homework headless profile:=ideal seed:=42
+
+    Терминал B: ./course observe --profile ideal --seed 42 --target-rtf 1.0 --duration 20 --output evidence/noise-ideal.json
+
+    После observe остановить launch через Ctrl+C.
+
+    Терминал A: ./course homework headless profile:=white seed:=42
+
+    Терминал B: ./course observe --profile white --seed 42 --target-rtf 1.0 --duration 20 --output evidence/noise-white.json
+
+    После observe остановить launch через Ctrl+C.
+
+    Терминал A: ./course homework headless profile:=biased seed:=42
+
+    Терминал B: ./course observe --profile biased --seed 42 --target-rtf 1.0 --duration 20 --output evidence/noise-biased.json
+
+    После observe остановить launch через Ctrl+C.'
+  evidence_path: evidence/noise-ideal.json; evidence/noise-white.json; evidence/noise-biased.json
+  limitation: Отклонения mean/std от параметров находятся в допусках 0.001 rad/s для ideal и 0.008 rad/s
+    для white/biased. Конечная выборка gyro z не доказывает независимость шума, не описывает все оси и
+    не устанавливает точность реального IMU.
+timing_conclusion: 'При уменьшении measured RTF с 0.983708 до 0.499153 частоты scan и camera по simulated
+  time остались 10 Hz, а wall rates уменьшились примерно с 9.84 до 5.00 Hz. За одинаковые 10 simulated
+  seconds получено по 100 scan/image samples. Для IMU: N=989/1001, sim_hz=98.8/100.0, wall_hz=97.182/49.914.
+  Результаты согласуются с wall_hz ≈ sim_hz * measured RTF. Reset начинает новую эпоху; данные разных
+  эпох не смешиваются. После reset для следующего опыта выполняется полный перезапуск.'
+noise_conclusion: Ideal даёт практически нулевые gyro mean/std; white даёт mean≈0 и std≈0.02 rad/s; biased
+  даёт mean≈0.08 при std≈0.02 rad/s. Смещение меняет среднее, случайный шум создаёт разброс. Результаты
+  соответствуют параметрам в пределах опубликованных допусков; вывод ограничен данными стационарными выборками.
+counterexample:
+  file: tests/test_homework_metrics_regression.py
+  defect_detected: 'test_multiple_resets_and_duplicate_at_epoch_end: три эпохи с повторяющимися между
+    эпохами stamps и duplicate в конце последней эпохи. Ожидаются epochs=3, samples=2, sim_hz=2, wall_hz=1,
+    gyro_mean=0.2, gyro_std=0.1 и неизменный вход. Тест обнаруживает глобальную дедупликацию между эпохами,
+    неверный выбор последней эпохи, замену первой записи duplicate последней и смешение gyro values разных
+    эпох.'
+  command: ./course test

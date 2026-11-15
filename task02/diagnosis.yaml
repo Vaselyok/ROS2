@@ -1,0 +1,77 @@
+schema: 1
+task: task02
+
+environment:
+  clean_start_command: "./course shell"
+  ros_distribution: "jazzy"
+  rmw_implementation: "rmw_cyclonedds_cpp"
+
+incidents:
+  - id: "inc-01-missing-config-data-files"
+    symptom: "Launch fails to find configuration file; nodes start with default parameter values"
+    evidence:
+      command: "ros2 launch warehouse_bringup warehouse.launch.py namespace:=robot_1"
+      observation: "[WARNING] [launch_ros.actions.node]: Parameter file path is not a file: /workspace/install/warehouse_bringup/share/warehouse_bringup/config/warehouse.yaml"
+    fault_class: "packaging"
+    root_cause: "warehouse_bringup/setup.py omitted config directory from data_files in setuptools setup()"
+    minimal_fix: "Add (os.path.join('share', package_name, 'config'), glob('config/*.yaml')) to data_files in setup.py"
+    verification:
+      command: "colcon build --packages-select warehouse_bringup && ls install/warehouse_bringup/share/warehouse_bringup/config/warehouse.yaml"
+      observation: "File exists in install directory; parameter path warnings disappear on launch"
+
+  - id: "inc-02-wrong-node-name-in-yaml"
+    symptom: "range_sensor runs at default 5.0 Hz instead of 4.0 Hz configured in YAML"
+    evidence:
+      command: "ros2 launch warehouse_bringup warehouse.launch.py namespace:=robot_1"
+      observation: "[range_sensor-1] [INFO] [robot_1.range_sensor]: publishing deterministic ranges at 5.00 Hz"
+    fault_class: "parameters"
+    root_cause: "config/warehouse.yaml targeted /**/front_range_sensor instead of actual node name /**/range_sensor"
+    minimal_fix: "Rename /**/front_range_sensor to /**/range_sensor in config/warehouse.yaml"
+    verification:
+      command: "ros2 param get /robot_1/range_sensor publish_rate_hz"
+      observation: "Double value is: 4.0"
+
+  - id: "inc-03-global-safety-topic-namespace-leak"
+    symptom: "Safety topic published to global root /safety/state, ignoring node namespace and causing cross-talk"
+    evidence:
+      command: "ros2 topic list"
+      observation: "/safety/state appears as global absolute topic alongside /robot_1/* topics"
+    fault_class: "namespace"
+    root_cause: "Hardcoded leading slash '/safety/state' in safety_monitor.py and operator_panel.py bypasses PushRosNamespace"
+    minimal_fix: "Change '/safety/state' to relative topic name 'safety/state' in safety_monitor.py and operator_panel.py"
+    verification:
+      command: "ros2 topic list"
+      observation: "/robot_1/safety/state and /robot_2/safety/state correctly scoped under robot namespaces"
+
+  - id: "inc-04-qos-incompatibility-reliability-durability"
+    symptom: "Incompatible QoS warnings on range/readings (RELIABILITY) and safety/state (DURABILITY); late-joiner operator_panel misses state"
+    evidence:
+      command: "ros2 launch warehouse_bringup warehouse.launch.py namespace:=robot_1"
+      observation: "obstacle_filter reports incompatible QoS RELIABILITY; safety_monitor and operator_panel report incompatible QoS DURABILITY"
+    fault_class: "qos"
+    root_cause: "obstacle_filter subscribed to range/readings using integer depth (default Reliable) against Best Effort publisher; safety_status_qos offered Durability VOLATILE while operator_panel requested TRANSIENT_LOCAL"
+    minimal_fix: "Use sensor_data_qos() in obstacle_filter.py; set durability=DurabilityPolicy.TRANSIENT_LOCAL in safety_status_qos() in qos.py"
+    verification:
+      command: "ros2 launch warehouse_bringup warehouse.launch.py namespace:=robot_1"
+      observation: "No QoS warnings; operator_panel receives cached state: PANEL_READY namespace=/robot_1 stopped=True sequence=0"
+
+  - id: "inc-05-undeclared-geometry-msgs-dependency"
+    symptom: "geometry_msgs used in drive_controller but missing from package manifest dependencies"
+    evidence:
+      command: "grep -rn 'geometry_msgs' src/warehouse_nodes/"
+      observation: "Imports geometry_msgs.msg.Twist without declaring it in package.xml"
+    fault_class: "dependencies"
+    root_cause: "src/warehouse_nodes/package.xml omitted <exec_depend>geometry_msgs</exec_depend>"
+    minimal_fix: "Add <exec_depend>geometry_msgs</exec_depend> to src/warehouse_nodes/package.xml"
+    verification:
+      command: "rosdep install --from-paths src --ignore-src -y"
+      observation: "#All required rosdeps installed successfully"
+
+final_acceptance:
+  clean_pipeline: "rosdep install succeeds, colcon build and colcon test complete with 0 failures and 0 errors"
+  single_robot_graph: "warehouse.launch.py raises exactly 6 nodes in /robot_1, all topics relative, parameters match warehouse.yaml"
+  late_joiner: "operator_panel starts after 1.5s delay and immediately receives TRANSIENT_LOCAL safety/state (PANEL_READY)"
+  two_robot_isolation: "two_robots.launch.py raises 12 nodes across /robot_1 and /robot_2 with no cross-talk warnings; source_namespace matches"
+  clean_shutdown: "SIGINT cleanly terminates all child processes across both namespaces without orphans"
+
+known_limits: "None"

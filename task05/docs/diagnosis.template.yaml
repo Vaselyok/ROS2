@@ -1,0 +1,30 @@
+task: L05
+commit: "TODO exact submitted SHA"
+environment:
+  image_id: "TODO"
+  architecture: "TODO"
+  package_versions: "TODO"
+experiments:
+  mission:
+    command: "TODO"
+    evidence: "evidence/mission-measured.json"
+    action_result: "TODO status + error_code"
+    feedback_samples: "TODO"
+    measured_final_error_rad: "TODO"
+  cancellation:
+    command: "TODO"
+    evidence: "evidence/cancel-measured.json"
+    cancel_status: "TODO"
+    measured_hold_deviation_rad: "TODO"
+  variant:
+    namespace: "TODO"
+    joint_order: "TODO"
+    time_scale: "TODO"
+    observation: "TODO what changed and what stayed physically equivalent"
+counterexample:
+  test: "TODO file and test name"
+  bug_detected: "TODO"
+explanation:
+  tracking: "TODO reference vs measured position; units and observed error"
+  cancellation: "TODO acknowledgment vs result vs measured stop"
+  limits_of_conclusion: "TODO fixed base; simulator servo; no balance claim"

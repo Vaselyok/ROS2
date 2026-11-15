@@ -1,0 +1,15 @@
+# TODO B: enable the two sensor systems and set the contracted sensor rates.
+# Physics, UserCommands and SceneBroadcaster are already provided.
+sensor_systems:
+  - Sensors
+  - Imu
+
+rates:
+  scan: 10.0
+  imu: 100.0
+  camera: 10.0
+  odom: 50.0
+
+camera:
+  width: 160
+  height: 120

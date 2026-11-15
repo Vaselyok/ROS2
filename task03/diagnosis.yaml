@@ -1,0 +1,248 @@
+assignment: L03
+student: "Василий Козлов"
+
+observations:
+  - symptom: "Положение LiDAR относительно базы не соответствует контракту."
+    before:
+      command: "cat src/rover_description/config/homework_mounts.yaml"
+      evidence: >
+        lidar_xyz: [0.10, 0.12, 0.16].
+        По физической спецификации требуется [0.10, 0.0, 0.16] м.
+    root_cause: >
+      В origin крепления LiDAR через YAML и Xacro попадал лишний
+      перенос на 0.12 м вдоль оси Y базы.
+    change: >
+      В homework_mounts.yaml значение lidar_xyz изменено
+      с [0.10, 0.12, 0.16] на [0.10, 0.0, 0.16].
+    after:
+      command: "./course check"
+      evidence: >
+        После совокупности исправлений: passed=true,
+        lidar successful_samples=101,
+        geometry_max_error_m=3.583910153046161e-15 м.
+        Целевая система координат rover/odom, допуск 0.005 м.
+
+  - symptom: "Отсутствует поворот между camera_link и camera_optical_frame."
+    before:
+      command: "cat src/rover_description/config/homework_mounts.yaml"
+      evidence: >
+        camera_optical_rpy: [0.0, 0.0, 0.0].
+        Требуемое значение: [-pi/2, 0, -pi/2] рад.
+    root_cause: >
+      Optical axes камеры ошибочно совпадали с body axes.
+      Координаты observation/camera выражены в optical frame,
+      поэтому отсутствие поворота искажало преобразование в odom.
+    change: >
+      camera_optical_rpy установлено в
+      [-1.5707963267948966, 0.0, -1.5707963267948966].
+    after:
+      command: "./course check"
+      evidence: >
+        После совокупности исправлений: camera successful_samples=100,
+        geometry_max_error_m=1.3245663279043849e-14 м
+        в rover/odom при допуске 0.005 м.
+
+  - symptom: "Калибровочное наблюдение IMU содержит неверный frame ID."
+    before:
+      command: "./course exec ros2 topic echo /rover/observation/imu --once"
+      evidence: >
+        На stamp=1755.950000000 с получен
+        header.frame_id=rover/base_link вместо rover/imu_link.
+        Параметр imu_frame в конфигурации и работающем fixture:
+        base_link.
+    root_cause: >
+      src/rover_bringup/config/homework.yaml переопределял imu_frame
+      значением base_link. Координаты наблюдения в системе IMU
+      были подписаны как координаты в системе базы.
+    change: >
+      В homework.yaml установлено imu_frame: imu_link.
+      Префикс добавляется существующей функцией fixture;
+      код fixture не изменялся.
+    after:
+      command: "./course check"
+      evidence: >
+        После совокупности исправлений: imu successful_samples=100,
+        geometry_max_error_m=1.620963636843274e-14 м
+        в rover/odom при допуске 0.005 м.
+
+  - symptom: "Odometry содержит неправильный child_frame_id."
+    before:
+      command: "./course exec ros2 topic echo /rover/odom --once"
+      evidence: >
+        На stamp=1990.450000000 с:
+        header.frame_id=rover/odom,
+        child_frame_id=rover/lidar_link.
+        Исходный ./course check сообщал:
+        odometry parent/child frame contract.
+    root_cause: >
+      В homework.yaml параметр odom_child_frame имел значение
+      lidar_link. По контракту odometry описывает положение
+      base_link относительно odom.
+      В TF уже существовало правильное ребро odom -> base_link.
+    change: >
+      В homework.yaml установлено odom_child_frame: base_link.
+      Дополнительные TF publishers не добавлялись.
+    after:
+      command: "./course check"
+      evidence: >
+        passed=true, failures=[], odom_comparisons=101.
+        Ошибка odometry parent/child frame contract отсутствует.
+
+  - symptom: "Policy validator не реализована."
+    before:
+      command: >
+        ./course exec python3 -m pytest
+        src/rover_tf_validator/test/test_policy.py -q
+      evidence: >
+        15 failed.
+        quaternion_is_valid возвращала None,
+        validate_observation возвращала NOT_IMPLEMENTED.
+        В исходном ./course check:
+        transport_statuses.NOT_IMPLEMENTED=303,
+        successful_samples={}, geometry_max_error_m={}.
+    root_cause: >
+      Обе policy-функции в validator.py оставались заглушками.
+      Проверки входа, кватерниона и преобразование наблюдения
+      на время измерения не выполнялись.
+    change: >
+      Реализована проверка четырёх конечных числовых компонент
+      кватерниона и abs(norm(q)-1) <= 0.001 без нормализации.
+      Реализована проверка source/target frame IDs, положительного
+      целочисленного stamp_ns и конечности координат.
+      Выполняется один неблокирующий lookup(target, source, stamp_ns)
+      на исходное время измерения.
+      LookupFailure.status/detail сохраняются.
+      Проверяются перенос и вращение transform, затем используется
+      предоставленная geometry.apply_transform.
+      Отчёт сохраняет исходные source/target/stamp.
+      Подмена на latest, now или identity отсутствует.
+    after:
+      command: "./course test; ./course check"
+      evidence: >
+        В полном прогоне все 15 policy tests прошли.
+        Acceptance: passed=true, failures=[],
+        transport_statuses.OK=301,
+        camera=100, imu=100, lidar=101 успешных наблюдений.
+
+  - symptom: >
+      Первоначальный собственный regression test проходил
+      даже при намеренной подмене measurement stamp на latest.
+    before:
+      command: >-
+        ./course exec bash -c 'PYTHONPATH=/workspace/src/rover_tf_validator${PYTHONPATH:+:$PYTHONPATH} python3 -m pytest /workspace/src/rover_tf_validator/test/test_measurement_rotation.py -vv'
+      evidence: >
+        Тест проходил с третьим аргументом lookup, равным 0.
+        При просмотре файла обнаружено, что тест заканчивался
+        определением вложенной функции lookup.
+        Вызов validator и assertions отсутствовали.
+    root_cause: >
+      Тест только создавал входные данные и mock lookup,
+      но не запускал проверяемую функцию и не проверял результат.
+    change: >
+      Добавлены вызов validate_observation, численная проверка
+      преобразованной точки, проверка исходного stamp и списка
+      вызовов lookup. Добавлена проверка отличия latest-результата.
+    after:
+      command: >-
+        ./course exec bash -c 'PYTHONPATH=/workspace/src/rover_tf_validator${PYTHONPATH:+:$PYTHONPATH} python3 -m pytest /workspace/src/rover_tf_validator/test/test_measurement_rotation.py -vv'
+      evidence: >
+        При намеренном lookup(..., 0) тест падает на численной
+        проверке: получено [3.0, 0.0, 0.0] вместо [1.0, 2.0, 0.0] м.
+        При корректном measurement stamp тест проходит.
+
+validator:
+  measurement_time_test: >
+    Собственный тест:
+    test_measurement_rotation.py::test_delayed_point_uses_measurement_rotation.
+    Команда запуска приведена в observations.
+    Source=unit/lidar, target=unit/odom,
+    stamp_ns=12500000000, исходная точка=(2, 0, 0) м.
+    Historical transform: перенос (1, 0, 0) м и yaw=pi/2.
+    Latest transform: тот же перенос и yaw=0.
+    Правильный результат=(1, 2, 0) м;
+    результат latest=(3, 0, 0) м.
+    Евклидово расхождение sqrt(8), приблизительно 2.828 м.
+    Подмена stamp на 0 обнаруживается численным assertion,
+    а не только проверкой наличия исключения.
+
+  failure_case: >
+    Команда: ./course test.
+    В test_policy.py прошли три параметризованных случая
+    test_lookup_failure_is_not_replaced_with_latest_or_identity:
+    UNKNOWN_FRAME, DISCONNECTED, TIME_UNAVAILABLE.
+    Проверены сохранение статуса ошибки, point=None
+    и ровно один вызов lookup.
+    Реализация передаёт исходный detail в report.
+    Подмена неуспешного lookup на latest или identity отсутствует.
+
+  namespace_variant: >
+    Запуск:
+    ./course run homework namespace:=testbot
+    frame_prefix:=testbot/ rviz:=false.
+    Проверка:
+    ./course exec ros2 run rover_tf_validator acceptance
+    --frame-prefix testbot/
+    --output /workspace/evidence/testbot.json
+    --ros-args -r __ns:=/testbot -p use_sim_time:=true.
+    Результат: passed=true, failures=[].
+    successful_samples: camera=100, imu=100, lidar=100.
+    transport_statuses.OK=300, odom_comparisons=100.
+    geometry_max_error_m:
+    camera=9.883479487474066e-16,
+    imu=3.4684476073050936e-15,
+    lidar=4.47545209131181e-16.
+    Допуск 0.005 м.
+    Обнаружены publishers /testbot/fixture
+    и /testbot/robot_state_publisher.
+
+verification:
+  build: >
+    Проект собирается и запускается через ./course build
+    и ./course run homework.
+    При проверке холодного запуска первоначально ./course check
+    был выполнен без работающей сцены: отсутствовали publishers
+    /tf и /tf_static, наблюдения и odometry.
+    После запуска homework проверка прошла.
+    Для воспроизведения launch должен оставаться работающим,
+    а ./course check запускаться во втором терминале.
+
+  public_tests: >
+    Команда: ./course test.
+    Получен полный отчёт:
+    4 packages finished;
+    32 tests, 0 errors, 0 failures, 0 skipped.
+    rover_fixture: 7 passed.
+    rover_tf_validator: 25 passed, включая
+    test_model.py — 5,
+    test_policy.py — 15,
+    test_scaffold.py — 4,
+    test_measurement_rotation.py — 1.
+    Этот полный прогон предшествовал обнаружению неполного
+    собственного теста. После дополнения теста отдельно проверены
+    его прохождение с measurement stamp и падение с latest.
+
+  acceptance: >
+    Команда: ./course check.
+    passed=true, failures=[], frame_prefix=rover/.
+    tolerance_m=0.005.
+    successful_samples: camera=100, imu=100, lidar=101.
+    geometry_max_error_m:
+    camera=1.3245663279043849e-14,
+    imu=1.620963636843274e-14,
+    lidar=3.583910153046161e-15.
+    odom_comparisons=101, transport_statuses.OK=301.
+    На /tf и /tf_static обнаружены ожидаемые publishers:
+    /rover/fixture и /rover/robot_state_publisher.
+    Конфигурация src/rover_description/rviz/homework.rviz
+    изменена; отображение сцены проверено визуально.
+
+  cleanup: >
+    Запущенные launch и непрерывные диагностические процессы
+    завершались через Ctrl+C.
+    Предыдущая сцена останавливалась перед запуском следующей.
+
+known_limits:
+  - >
+    Полное восстановление пользовательского состояния после reset
+    ROS clock не входит в обязательную реализацию.
+    После reset требуется перезапуск validator/listeners.

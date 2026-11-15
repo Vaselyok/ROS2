@@ -1,0 +1,158 @@
+task: L05
+commit: '8c66eca5e99c663e38210504dd8c29ef1f756a97'
+environment:
+  image_id: sha256:38cf6b001d4025ebd43b6c8f7aec2dd86f98abe34b267d6e364cfe80ec7e826f
+  architecture: x86_64
+  gazebo_sim_version: 8.15.0
+  package_versions:
+    ros-jazzy-gz-ros2-control: 1.2.20-1noble.20261006.040504
+    ros-jazzy-ros2-control: 4.48.1-1noble.20261006.040510
+    ros-jazzy-ros2-controllers: 4.42.1-1noble.20260924.191822
+reproduction:
+  working_directory_host: task05/
+  start_host:
+  - docker compose up -d --build --wait workspace
+  - docker compose exec workspace bash
+  build_container:
+  - source /opt/ros/jazzy/setup.bash
+  - colcon build --symlink-install --event-handlers console_direct+
+  - source /workspace/install/setup.bash
+  each_additional_shell_host: docker compose exec workspace bash
+  each_additional_shell_container:
+  - source /opt/ros/jazzy/setup.bash
+  - source /workspace/install/setup.bash
+  pure_tests:
+    command: python3 -m pytest -q tests/test_homework_trajectory.py tests/test_my_trajectory.py
+    observation: Тесты прошли успешно, что подтверждено при выполнении работы.
+  launch_default: ros2 launch control_lab sim.launch.py mode:=homework controller_config:=/workspace/homework/controllers.yaml
+    namespace:=humanoid gui:=false rviz:=false
+  inspect_default:
+  - ros2 control list_controllers -c /humanoid/controller_manager
+  - ros2 control list_hardware_interfaces -c /humanoid/controller_manager
+  launch_variant: ros2 launch control_lab sim.launch.py mode:=homework controller_config:=/workspace/homework/controllers.yaml
+    namespace:=group5/demo gui:=false rviz:=false
+  sequence: Запустить одну сцену. В отдельном терминале с подключённым окружением ROS начать запись до
+    отправки цели клиентом, предусмотрев достаточно времени для движения и последующего удержания. Завершить
+    эксперименты с исходным namespace, остановить launch через Ctrl+C и дождаться выхода, затем запустить
+    сцену с другим namespace. Две сцены одновременно не запускать.
+  stop:
+  - Дождаться результата клиента или завершения отмены и удержания, а также окончания записи.
+  - Нажать Ctrl+C в терминале с launch и дождаться завершения процесса.
+  - 'В терминале хоста: docker compose down --timeout 10'
+  - 'В терминале хоста: docker compose ps > evidence/cleanup.txt'
+  cleanup_evidence: evidence/cleanup.txt
+  cleanup_observation: Вывод docker compose ps содержал только заголовок таблицы, без строк контейнеров.
+experiments:
+  mission:
+    command: python3 /workspace/homework/client.py --timeout 180 --output /workspace/evidence/mission-client.json
+    recorder: ros2 run control_lab lab measure --duration 30 --timeout 180 --output /workspace/evidence/mission-measured.json
+    evidence: evidence/mission-measured.json
+    client_evidence: evidence/mission-client.json
+    plot: evidence/mission-measured.png
+    action_result: 'SUCCEEDED; error_code=0 (SUCCESSFUL); клиент: passed=true'
+    accepted_sim_s: 191.738
+    succeeded_sim_s: 199.742
+    feedback_samples: 302
+    measured_final_error_rad: 0.03989383981786245
+    final_error_context: Клиент проверил свежий снимок измеренных положений суставов сразу после получения
+      результата миссии.
+    observer:
+      controller_samples: 2999
+      joint_samples: 2999
+      observed_duration_sim_s: 29.980000000000018
+      missing_joints: []
+      max_tracking_error_rad: 0.0636880512358659
+      left_elbow_min_rad: -0.8999999999930914
+      left_wrist_min_rad: -0.30392314910831186
+      left_wrist_max_rad: 0.32330215914584054
+      max_abs_final_reference_measurement_error_rad: 9.373190426289448e-12
+      all_observed_joints_within_model_limits: true
+    observation: Измеренные отклонения локтя и запястья достигают порогов движения из контракта. Максимальная
+      наблюдаемая ошибка слежения меньше 0.30 rad. Ошибка по снимку клиента при завершении действия меньше
+      конечного допуска 0.12 rad; к концу более длительной записи суставы установились практически в нейтральное
+      положение. Эти конечные измерения относятся к разным моментам времени.
+  cancellation:
+    command: python3 /workspace/homework/client.py --cancel-after 2 --timeout 180 --output /workspace/evidence/cancel-client.json
+    recorder: ros2 run control_lab lab measure --duration 12 --timeout 180 --output /workspace/evidence/cancel-measured.json
+    evidence: evidence/cancel-measured.json
+    client_evidence: evidence/cancel-client.json
+    plot: evidence/cancel-measured.png
+    cancel_status: Клиент зафиксировал canceled, затем принятие новой цели hold; passed=true.
+    cancel_requested_sim_s: 528.58
+    canceled_sim_s: 528.626
+    hold_requested_sim_s: 528.626
+    hold_accepted_sim_s: 528.626
+    hold_measured_sim_s: 529.428
+    feedback_samples: 43
+    measured_hold_deviation_rad: 2.6024125060475356e-07
+    hold_snapshot_max_abs_position_rad: 0.4083840460775279
+    hold_snapshot_selected_rad:
+      left_shoulder_pitch: 0.06806400768126562
+      left_shoulder_roll: 0.2270228811779632
+      left_elbow_pitch: -0.4083840460775279
+      left_wrist_roll: 1.903220168676687e-13
+    observation: Цель удержания соответствует измеренной промежуточной позе, а не нейтральному положению
+      или конечной цели отменённой миссии. Максимальный модуль угла в снимке превышает 0.15 rad. Измеренное
+      отклонение при удержании по отчёту клиента меньше 0.06 rad. График также показывает длительное сохранение
+      ненулевых положений плеча и локтя. Приведённые отметки событий используют время симуляции; разности
+      этих отметок не подтверждают отдельно соблюдение двухсекундных ограничений по монотонным часам.
+  variant:
+    namespace: group5/demo
+    joint_order: reverse
+    time_scale: 1.2
+    command: python3 /workspace/homework/client.py --namespace group5/demo --joint-order reverse --time-scale
+      1.2 --timeout 180 --output /workspace/evidence/variant-client.json
+    recorder: ros2 run control_lab lab measure --namespace group5/demo --duration 30 --timeout 180 --output
+      /workspace/evidence/variant-measured.json
+    evidence: evidence/variant-measured.json
+    client_evidence: evidence/variant-client.json
+    plot: evidence/variant-measured.png
+    action_result: 'SUCCEEDED; error_code=0 (SUCCESSFUL); клиент: passed=true'
+    feedback_samples: 194
+    accepted_sim_s: 30.431
+    succeeded_sim_s: 40.031
+    measured_final_error_rad: 0.03732879830095236
+    observation: 'Список joint_names клиента содержит суставы в обратном порядке относительно модели.
+      График относится к /group5/demo/humanoid_controller и сохраняет ту же последовательность физических
+      движений: подъём руки, движение запястья и возврат в нейтральное положение. Масштабирование времени
+      увеличивает номинальную длительность миссии с 8.0 до 9.6 секунд симуляции, что совпадает с интервалом
+      между принятием цели и успешным завершением. Namespace меняет пути ROS; перестановка суставов меняет
+      представление данных в сообщениях; масштабирование времени меняет длительность и скорость, сохраняя
+      целевые позы.'
+  keyboard_interrupt:
+    namespace: group5/demo
+    time_scale: 1.5
+    command: python3 /workspace/homework/client.py --namespace group5/demo --time-scale 1.5 --timeout
+      180 --output /workspace/evidence/interrupt-client.json
+    manual_action: Нажать Ctrl+C один раз в терминале работающего клиента; оставить симулятор запущенным
+      и дождаться завершения отмены и удержания.
+    evidence: evidence/interrupt-measured.json
+    client_evidence: evidence/interrupt-client.json
+    plot: evidence/interrupt-measured.png
+    cancel_requested_sim_s: 584.735
+    canceled_sim_s: 584.776
+    hold_accepted_sim_s: 584.777
+    hold_measured_sim_s: 585.578
+    feedback_samples: 116
+    measured_hold_deviation_rad: 1.3637962323342911e-07
+    observation: После Ctrl+C клиент зафиксировал отмену и новое удержание измеренной позы. В снимке угол
+      локтя составлял примерно -0.90 rad, запястья — +0.242 rad. passed=false с ошибкой "interrupted by
+      Ctrl+C" отражает намеренное прерывание; события отмены и удержания, а также измеренное отклонение
+      документируют обработку прерывания.
+counterexample:
+  test: tests/test_my_trajectory.py::MyTrajectoryTests::test_hold_preserves_nonzero_measured_pose_in_requested_order
+  bug_detected: Возврат нейтральной позы вместо измеренного снимка либо формирование массива positions
+    в порядке добавления ключей словаря вместо порядка joint_names. Тест использует ненулевую измеренную
+    позу и другой порядок ключей словаря. Также проверяются неизменность входов и независимость выходного
+    списка.
+explanation:
+  tracking: Ошибка слежения равна max_i abs(desired_i - actual_i) для соответствующих суставов одного
+    сообщения обратной связи, в радианах. Это не расстояние до конечной нейтральной позы на протяжении
+    всей миссии. В отчёте наблюдателя максимальная ошибка при обычном движении составляет 0.0636880512358659
+    rad.
+  cancellation: Подтверждение запроса отмены, терминальный статус CANCELED, завершение нового действия
+    hold и измеренное физическое удержание — разные проверки. Выданный адаптер отвечает за обмен сообщениями
+    action, проверку конечных результатов и свежесть снимка. H3 строит точку удержания из измеренного
+    снимка с проверкой ограничений. Сводка клиента содержит canceled, принятие hold и hold_measured; отдельного
+    события успешного завершения hold в ней нет. Независимые потоки состояний суставов и контроллера сохранены
+    для проверки.
