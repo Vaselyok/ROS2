@@ -1,0 +1,31 @@
+{
+  "failures": [],
+  "frame_prefix": "rover/",
+  "geometry_max_error_m": {
+    "camera": 2.3227399345621933e-13,
+    "imu": 2.5954269478957147e-13,
+    "lidar": 5.957924867857902e-14
+  },
+  "odom_comparisons": 100,
+  "ownership_scope": "Expected publisher graph and unique edge parents; per-message publisher attribution is unavailable in Jazzy Python metadata.",
+  "passed": true,
+  "successful_samples": {
+    "camera": 100,
+    "imu": 100,
+    "lidar": 100
+  },
+  "tf_publishers": {
+    "/tf": [
+      "/rover/fixture",
+      "/rover/robot_state_publisher"
+    ],
+    "/tf_static": [
+      "/rover/fixture",
+      "/rover/robot_state_publisher"
+    ]
+  },
+  "tolerance_m": 0.005,
+  "transport_statuses": {
+    "OK": 300
+  }
+}

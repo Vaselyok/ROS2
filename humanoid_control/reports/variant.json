@@ -1,0 +1,246 @@
+{
+  "_excerpt": {
+    "client": {
+      "source_file": "evidence/variant-client.json",
+      "source_sha256": "77f7c2c613460025af4720d96847aae69bb429b224b6f630ed85b9d056116097",
+      "omitted_fields": [
+        "feedback"
+      ]
+    },
+    "measurement": {
+      "source_file": "evidence/variant-measured.json",
+      "source_sha256": "a32efd523f0991a4a22e13ef7ddc3e124caa9710166a4ade9302d2abd7890b44",
+      "omitted_fields": [
+        "controller_samples",
+        "joint_samples"
+      ]
+    }
+  },
+  "client": {
+    "namespace": "group5/demo",
+    "joint_names": [
+      "right_ankle_pitch",
+      "right_knee_pitch",
+      "right_hip_pitch",
+      "right_hip_roll",
+      "right_hip_yaw",
+      "left_ankle_pitch",
+      "left_knee_pitch",
+      "left_hip_pitch",
+      "left_hip_roll",
+      "left_hip_yaw",
+      "right_wrist_roll",
+      "right_elbow_pitch",
+      "right_shoulder_roll",
+      "right_shoulder_pitch",
+      "left_wrist_roll",
+      "left_elbow_pitch",
+      "left_shoulder_roll",
+      "left_shoulder_pitch"
+    ],
+    "events": [
+      {
+        "kind": "accepted",
+        "sim": 30.431,
+        "label": "mission",
+        "uuid": "029131985cea44db8a195368637b00ce"
+      },
+      {
+        "kind": "succeeded",
+        "sim": 40.031,
+        "max_error": 0.03732879830095236,
+        "error_code": 0
+      }
+    ],
+    "passed": true
+  },
+  "feedback_samples": 194,
+  "measurement": {
+    "schema_version": 1,
+    "source": "live_ros_gazebo_observation",
+    "namespace": "group5/demo",
+    "controller": "humanoid_controller",
+    "joint_names": [
+      "left_shoulder_pitch",
+      "left_shoulder_roll",
+      "left_elbow_pitch",
+      "left_wrist_roll",
+      "right_shoulder_pitch",
+      "right_shoulder_roll",
+      "right_elbow_pitch",
+      "right_wrist_roll",
+      "left_hip_yaw",
+      "left_hip_roll",
+      "left_hip_pitch",
+      "left_knee_pitch",
+      "left_ankle_pitch",
+      "right_hip_yaw",
+      "right_hip_roll",
+      "right_hip_pitch",
+      "right_knee_pitch",
+      "right_ankle_pitch"
+    ],
+    "completed": true,
+    "started_unix": 1793896803.2270207,
+    "environment": {
+      "ros_distro": "jazzy",
+      "ros_domain_id": "45",
+      "gz_partition": "shad-l05-local"
+    },
+    "window_start_sim_s": 20.12,
+    "summary": {
+      "controller_samples": 3000,
+      "joint_samples": 2999,
+      "observed_duration_sim_s": 29.99,
+      "missing_joints": [],
+      "joints": {
+        "left_shoulder_pitch": {
+          "max_abs_error_rad": 0.005681405421197244,
+          "rms_error_rad": 0.002205132100984834,
+          "final_error_rad": -4.212935278328724e-49,
+          "measured_min_rad": 0.0,
+          "measured_max_rad": 0.15000000000117977,
+          "within_model_limits": true
+        },
+        "left_shoulder_roll": {
+          "max_abs_error_rad": 0.01893801807407902,
+          "rms_error_rad": 0.00735044033653282,
+          "final_error_rad": -1.4043117439260243e-48,
+          "measured_min_rad": 0.0,
+          "measured_max_rad": 0.4999999999983252,
+          "within_model_limits": true
+        },
+        "left_elbow_pitch": {
+          "max_abs_error_rad": 0.034088432539341795,
+          "rms_error_rad": 0.013230792605881468,
+          "final_error_rad": 2.5277611314681846e-48,
+          "measured_min_rad": -0.8999999999930931,
+          "measured_max_rad": 0.0,
+          "within_model_limits": true
+        },
+        "left_wrist_roll": {
+          "max_abs_error_rad": 0.05297110135068375,
+          "rms_error_rad": 0.015053308231756971,
+          "final_error_rad": -9.830182610045551e-49,
+          "measured_min_rad": -0.3117743661878001,
+          "measured_max_rad": 0.32776212566619956,
+          "within_model_limits": true
+        },
+        "right_shoulder_pitch": {
+          "max_abs_error_rad": 0.0,
+          "rms_error_rad": 0.0,
+          "final_error_rad": 0.0,
+          "measured_min_rad": 0.0,
+          "measured_max_rad": 0.0,
+          "within_model_limits": true
+        },
+        "right_shoulder_roll": {
+          "max_abs_error_rad": 0.0,
+          "rms_error_rad": 0.0,
+          "final_error_rad": 0.0,
+          "measured_min_rad": 0.0,
+          "measured_max_rad": 0.0,
+          "within_model_limits": true
+        },
+        "right_elbow_pitch": {
+          "max_abs_error_rad": 0.0,
+          "rms_error_rad": 0.0,
+          "final_error_rad": 0.0,
+          "measured_min_rad": 0.0,
+          "measured_max_rad": 0.0,
+          "within_model_limits": true
+        },
+        "right_wrist_roll": {
+          "max_abs_error_rad": 0.0,
+          "rms_error_rad": 0.0,
+          "final_error_rad": 0.0,
+          "measured_min_rad": 0.0,
+          "measured_max_rad": 0.0,
+          "within_model_limits": true
+        },
+        "left_hip_yaw": {
+          "max_abs_error_rad": 0.0,
+          "rms_error_rad": 0.0,
+          "final_error_rad": 0.0,
+          "measured_min_rad": 0.0,
+          "measured_max_rad": 0.0,
+          "within_model_limits": true
+        },
+        "left_hip_roll": {
+          "max_abs_error_rad": 0.0,
+          "rms_error_rad": 0.0,
+          "final_error_rad": 0.0,
+          "measured_min_rad": 0.0,
+          "measured_max_rad": 0.0,
+          "within_model_limits": true
+        },
+        "left_hip_pitch": {
+          "max_abs_error_rad": 2.552272038069854e-13,
+          "rms_error_rad": 2.3740290457814605e-13,
+          "final_error_rad": -2.372774540312929e-13,
+          "measured_min_rad": 2.3727744416504783e-13,
+          "measured_max_rad": 4.245727631760634e-13,
+          "within_model_limits": true
+        },
+        "left_knee_pitch": {
+          "max_abs_error_rad": 1.5578883450546975e-12,
+          "rms_error_rad": 1.4490894195855612e-12,
+          "final_error_rad": -1.4483236224932896e-12,
+          "measured_min_rad": 1.448323612084955e-12,
+          "measured_max_rad": 2.591560731640213e-12,
+          "within_model_limits": true
+        },
+        "left_ankle_pitch": {
+          "max_abs_error_rad": 1.0082267554169814e-11,
+          "rms_error_rad": 9.37814662844714e-12,
+          "final_error_rad": -9.37319053345539e-12,
+          "measured_min_rad": 9.37319035304414e-12,
+          "measured_max_rad": 1.677193802312851e-11,
+          "within_model_limits": true
+        },
+        "right_hip_yaw": {
+          "max_abs_error_rad": 0.0,
+          "rms_error_rad": 0.0,
+          "final_error_rad": 0.0,
+          "measured_min_rad": 0.0,
+          "measured_max_rad": 0.0,
+          "within_model_limits": true
+        },
+        "right_hip_roll": {
+          "max_abs_error_rad": 0.0,
+          "rms_error_rad": 0.0,
+          "final_error_rad": 0.0,
+          "measured_min_rad": 0.0,
+          "measured_max_rad": 0.0,
+          "within_model_limits": true
+        },
+        "right_hip_pitch": {
+          "max_abs_error_rad": 2.552272038069854e-13,
+          "rms_error_rad": 2.3740290457814605e-13,
+          "final_error_rad": -2.372774540312929e-13,
+          "measured_min_rad": 2.3727744416504783e-13,
+          "measured_max_rad": 4.245727631760634e-13,
+          "within_model_limits": true
+        },
+        "right_knee_pitch": {
+          "max_abs_error_rad": 1.5578883450546975e-12,
+          "rms_error_rad": 1.4490894195855612e-12,
+          "final_error_rad": -1.4483236224932896e-12,
+          "measured_min_rad": 1.448323612084955e-12,
+          "measured_max_rad": 2.591560731640213e-12,
+          "within_model_limits": true
+        },
+        "right_ankle_pitch": {
+          "max_abs_error_rad": 1.0082267554169814e-11,
+          "rms_error_rad": 9.37814662844714e-12,
+          "final_error_rad": -9.37319053345539e-12,
+          "measured_min_rad": 9.37319035304414e-12,
+          "measured_max_rad": 1.677193802312851e-11,
+          "within_model_limits": true
+        }
+      }
+    },
+    "window_end_sim_s": 50.121,
+    "finished_unix": 1793896833.958905
+  }
+}

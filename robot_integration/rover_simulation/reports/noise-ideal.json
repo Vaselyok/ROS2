@@ -1,0 +1,456 @@
+{
+  "_excerpt": {
+    "source_file": "evidence/noise-ideal.json",
+    "source_sha256": "ec52c4b8c54784efd5dd0e64672cc31053d699d066999d36379e782aa3461a51",
+    "omitted_fields": [
+      "streams"
+    ]
+  },
+  "schema_version": 1,
+  "action": "observe",
+  "mode": "homework",
+  "namespace": "rover",
+  "frame_prefix": "rover/",
+  "world_name": "lab",
+  "parameters": {
+    "action": "observe",
+    "operation": null,
+    "mode": "homework",
+    "namespace": "rover",
+    "frame_prefix": "rover/",
+    "world_name": "lab",
+    "seed": 42,
+    "target_rtf": 1.0,
+    "profile": "ideal",
+    "duration": 20.0,
+    "timeout": 90.0,
+    "steps": 1000,
+    "output": "evidence/noise-ideal.json"
+  },
+  "completed": true,
+  "success": true,
+  "checks": [
+    {
+      "name": "clock_authority",
+      "category": "frames_time",
+      "ok": true,
+      "detail": {
+        "publisher_count": 1
+      }
+    },
+    {
+      "name": "scan_frames",
+      "category": "frames_time",
+      "ok": true,
+      "detail": {
+        "expected": "rover/lidar_frame",
+        "observed": [
+          "rover/lidar_frame"
+        ]
+      }
+    },
+    {
+      "name": "imu_frames",
+      "category": "frames_time",
+      "ok": true,
+      "detail": {
+        "expected": "rover/imu_frame",
+        "observed": [
+          "rover/imu_frame"
+        ]
+      }
+    },
+    {
+      "name": "image_frames",
+      "category": "frames_time",
+      "ok": true,
+      "detail": {
+        "expected": "rover/camera_optical_frame",
+        "observed": [
+          "rover/camera_optical_frame"
+        ]
+      }
+    },
+    {
+      "name": "info_frames",
+      "category": "frames_time",
+      "ok": true,
+      "detail": {
+        "expected": "rover/camera_optical_frame",
+        "observed": [
+          "rover/camera_optical_frame"
+        ]
+      }
+    },
+    {
+      "name": "odom_frames",
+      "category": "frames_time",
+      "ok": true,
+      "detail": {
+        "expected": "rover/odom",
+        "observed": [
+          "rover/odom"
+        ]
+      }
+    },
+    {
+      "name": "scan_samples",
+      "category": "sensors",
+      "ok": true,
+      "detail": {
+        "count": 200
+      }
+    },
+    {
+      "name": "scan_stamps",
+      "category": "frames_time",
+      "ok": true,
+      "detail": "nondecreasing nonzero stamps within the observation epoch"
+    },
+    {
+      "name": "imu_samples",
+      "category": "sensors",
+      "ok": true,
+      "detail": {
+        "count": 1997
+      }
+    },
+    {
+      "name": "imu_stamps",
+      "category": "frames_time",
+      "ok": true,
+      "detail": "nondecreasing nonzero stamps within the observation epoch"
+    },
+    {
+      "name": "image_samples",
+      "category": "sensors",
+      "ok": true,
+      "detail": {
+        "count": 200
+      }
+    },
+    {
+      "name": "image_stamps",
+      "category": "frames_time",
+      "ok": true,
+      "detail": "nondecreasing nonzero stamps within the observation epoch"
+    },
+    {
+      "name": "info_samples",
+      "category": "sensors",
+      "ok": true,
+      "detail": {
+        "count": 200
+      }
+    },
+    {
+      "name": "info_stamps",
+      "category": "frames_time",
+      "ok": true,
+      "detail": "nondecreasing nonzero stamps within the observation epoch"
+    },
+    {
+      "name": "odom_samples",
+      "category": "sensors",
+      "ok": true,
+      "detail": {
+        "count": 1000
+      }
+    },
+    {
+      "name": "odom_stamps",
+      "category": "frames_time",
+      "ok": true,
+      "detail": "nondecreasing nonzero stamps within the observation epoch"
+    },
+    {
+      "name": "joint_states_samples",
+      "category": "sensors",
+      "ok": true,
+      "detail": {
+        "count": 13021
+      }
+    },
+    {
+      "name": "joint_states_stamps",
+      "category": "frames_time",
+      "ok": true,
+      "detail": "nondecreasing nonzero stamps within the observation epoch"
+    },
+    {
+      "name": "ground_truth_samples",
+      "category": "sensors",
+      "ok": true,
+      "detail": {
+        "count": 999
+      }
+    },
+    {
+      "name": "ground_truth_stamps",
+      "category": "frames_time",
+      "ok": true,
+      "detail": "nondecreasing nonzero stamps within the observation epoch"
+    },
+    {
+      "name": "scan_rate",
+      "category": "sensors",
+      "ok": true,
+      "detail": {
+        "sim_hz": 9.999999999999998,
+        "target": 10,
+        "relative_tolerance": 0.15
+      }
+    },
+    {
+      "name": "imu_rate",
+      "category": "sensors",
+      "ok": true,
+      "detail": {
+        "sim_hz": 99.8,
+        "target": 100,
+        "relative_tolerance": 0.15
+      }
+    },
+    {
+      "name": "image_rate",
+      "category": "sensors",
+      "ok": true,
+      "detail": {
+        "sim_hz": 9.999999999999998,
+        "target": 10,
+        "relative_tolerance": 0.15
+      }
+    },
+    {
+      "name": "odom_rate",
+      "category": "sensors",
+      "ok": true,
+      "detail": {
+        "sim_hz": 50.0,
+        "target": 50,
+        "relative_tolerance": 0.15
+      }
+    },
+    {
+      "name": "lidar_content",
+      "category": "sensors",
+      "ok": true,
+      "detail": {
+        "last": {
+          "stamp": 22.1,
+          "arrival": 19310.943290354,
+          "frame": "rover/lidar_frame",
+          "value": null,
+          "count": 180,
+          "finite_count": 90,
+          "center": 2.2201356887817383,
+          "min_range": 1.3294687271118164,
+          "range_min": 0.07999999821186066,
+          "range_max": 12.0,
+          "angle_min": -1.5707963705062866,
+          "angle_max": 1.5707963705062866,
+          "scan_time": 0.0,
+          "time_increment": 0.0
+        },
+        "stationary_center_expected": 2.22,
+        "tolerance_m": 0.15
+      }
+    },
+    {
+      "name": "camera_content",
+      "category": "sensors",
+      "ok": true,
+      "detail": {
+        "image": {
+          "stamp": 22.1,
+          "arrival": 19310.94510928,
+          "frame": "rover/camera_optical_frame",
+          "value": null,
+          "width": 160,
+          "height": 120,
+          "encoding": "rgb8",
+          "step": 480,
+          "bytes": 57600,
+          "pixel_min": 49,
+          "pixel_max": 243
+        },
+        "info": {
+          "stamp": 22.1,
+          "arrival": 19310.947152734,
+          "frame": "rover/camera_optical_frame",
+          "value": null,
+          "width": 160,
+          "height": 120,
+          "k": [
+            116.93568229675293,
+            0.0,
+            80.0,
+            0.0,
+            116.93567276000977,
+            60.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "p": [
+            116.93568229675293,
+            0.0,
+            80.0,
+            0.0,
+            0.0,
+            116.93567276000977,
+            60.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ]
+        }
+      }
+    },
+    {
+      "name": "imu_gravity",
+      "category": "sensors",
+      "ok": true,
+      "detail": {
+        "mean_z": 9.810000000001693,
+        "expected": 9.81,
+        "tolerance": 0.25
+      }
+    },
+    {
+      "name": "gyro_statistics",
+      "category": "sensors",
+      "ok": true,
+      "detail": {
+        "mean": 2.5221876000002378e-20,
+        "std": 3.116211922597238e-17,
+        "target_mean": 0.0,
+        "target_std": 0.0,
+        "tolerance": 0.001
+      }
+    },
+    {
+      "name": "wheel_joints",
+      "category": "frames_time",
+      "ok": true,
+      "detail": [
+        "left_wheel_joint",
+        "right_wheel_joint"
+      ]
+    },
+    {
+      "name": "scan_tf",
+      "category": "frames_time",
+      "ok": true,
+      "detail": "lookup at measurement stamp succeeded"
+    },
+    {
+      "name": "imu_tf",
+      "category": "frames_time",
+      "ok": true,
+      "detail": "lookup at measurement stamp succeeded"
+    },
+    {
+      "name": "image_tf",
+      "category": "frames_time",
+      "ok": true,
+      "detail": "lookup at measurement stamp succeeded"
+    },
+    {
+      "name": "odom_tf_consistency",
+      "category": "frames_time",
+      "ok": true,
+      "detail": {
+        "xy_error": 0.0,
+        "child_frame": "rover/base_link",
+        "tolerance_m": 0.02
+      }
+    }
+  ],
+  "environment": {
+    "architecture": "x86_64",
+    "ros_distro": "jazzy",
+    "domain": "44",
+    "gz_partition": "shad-l04-local"
+  },
+  "started_unix": 1793466982.2737436,
+  "window": {
+    "begin": {
+      "sim": 2.146,
+      "wall": 19290.745732442
+    },
+    "end": {
+      "sim": 22.161,
+      "wall": 19310.983470442
+    },
+    "measured_rtf": 0.9889939280763587
+  },
+  "metrics": {
+    "imu": {
+      "samples": 1997,
+      "sim_hz": 99.8,
+      "wall_hz": 98.73769606213577,
+      "gyro_mean": 2.5221876000002378e-20,
+      "gyro_std": 3.116211922597238e-17,
+      "epochs": 1
+    },
+    "odom": {
+      "samples": 1000,
+      "sim_hz": 50.0,
+      "wall_hz": 49.46650465345654,
+      "gyro_mean": null,
+      "gyro_std": null,
+      "epochs": 1
+    },
+    "ground_truth": {
+      "samples": 999,
+      "sim_hz": 49.949949949949946,
+      "wall_hz": 49.42734002635239,
+      "gyro_mean": null,
+      "gyro_std": null,
+      "epochs": 1
+    },
+    "joint_states": {
+      "samples": 13021,
+      "sim_hz": 650.6746626686657,
+      "wall_hz": 643.8364656567261,
+      "gyro_mean": null,
+      "gyro_std": null,
+      "epochs": 1
+    },
+    "info": {
+      "samples": 200,
+      "sim_hz": 9.999999999999998,
+      "wall_hz": 9.894033676246428,
+      "gyro_mean": null,
+      "gyro_std": null,
+      "epochs": 1
+    },
+    "image": {
+      "samples": 200,
+      "sim_hz": 9.999999999999998,
+      "wall_hz": 9.893460384140374,
+      "gyro_mean": null,
+      "gyro_std": null,
+      "epochs": 1
+    },
+    "scan": {
+      "samples": 200,
+      "sim_hz": 9.999999999999998,
+      "wall_hz": 9.893738402251083,
+      "gyro_mean": null,
+      "gyro_std": null,
+      "epochs": 1
+    }
+  },
+  "final_stats": {
+    "sim_time": 22.167,
+    "iterations": 22167,
+    "paused": false,
+    "real_time_factor": 0.9952159967038446,
+    "arrival": 19310.99064663
+  },
+  "finished_unix": 1793467004.476232
+}

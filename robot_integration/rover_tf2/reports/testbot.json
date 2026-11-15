@@ -1,0 +1,31 @@
+{
+  "failures": [],
+  "frame_prefix": "testbot/",
+  "geometry_max_error_m": {
+    "camera": 9.883479487474066e-16,
+    "imu": 3.4684476073050936e-15,
+    "lidar": 4.47545209131181e-16
+  },
+  "odom_comparisons": 100,
+  "ownership_scope": "Expected publisher graph and unique edge parents; per-message publisher attribution is unavailable in Jazzy Python metadata.",
+  "passed": true,
+  "successful_samples": {
+    "camera": 100,
+    "imu": 100,
+    "lidar": 100
+  },
+  "tf_publishers": {
+    "/tf": [
+      "/testbot/robot_state_publisher",
+      "/testbot/fixture"
+    ],
+    "/tf_static": [
+      "/testbot/robot_state_publisher",
+      "/testbot/fixture"
+    ]
+  },
+  "tolerance_m": 0.005,
+  "transport_statuses": {
+    "OK": 300
+  }
+}
